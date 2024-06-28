@@ -1,18 +1,12 @@
-import paho.mqtt.client as mqtt
-import time
+import threading
+from zentrale_website.main import start_website
+from zentrale_websocket.main import start_websocket
 
-client = mqtt.Client("Zentrale")
-# the broker should run on the same ip as the server no?
-client.connect("192.168.135.191")
-client.loop_start()
+website = threading.Thread(target=start_website, daemon=True)
+websocket = threading.Thread(target=start_websocket, daemon=True)
 
+website.start()
+websocket.start()
 
-client.subscribe("sensorclient/data")
-
-def on_message(client: mqtt.Client, userdata, msg):
-    data = msg.payload.decode()
-
-client.on_message = on_message
-
-while True:
-    time.sleep(1)
+website.join()
+websocket.join()
