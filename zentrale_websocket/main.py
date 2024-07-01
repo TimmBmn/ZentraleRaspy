@@ -1,9 +1,10 @@
 import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
 import websockets.server
 import websockets
 import asyncio
 import json
-
+import os
 
 class asdf:
     connections: dict = {}
@@ -23,17 +24,17 @@ async def handler(websocket):
         try:
             data = json.loads(message)
         except json.decoder.JSONDecodeError:
-            websocket.send(json.dumps({"status": "error", "message": "message wasn't a json object"}))
+            await websocket.send(json.dumps({"status": "error", "message": "message wasn't a json object"}))
             continue
 
         if not isinstance(data, dict):
-            websocket.send(json.dumps({"status": "error", "message": "message wasn't a json object"}))
+            await websocket.send(json.dumps({"status": "error", "message": "message wasn't a json object"}))
             continue
 
         try:
             data["type"]
         except KeyError:
-            websocket.send(json.dumps({"status": "error", "message": "type is missing"}))
+            await websocket.send(json.dumps({"status": "error", "message": "type is missing"}))
             continue
 
         if data["type"] == "connect":
@@ -41,7 +42,7 @@ async def handler(websocket):
 
 
 async def main():
-    await websockets.serve(handler, "localhost", 6000)
+    await websockets.serve(handler, "127.0.0.1", 6000)
     await asyncio.Future() # run forever
 
 
@@ -64,11 +65,18 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
     }
 
     websockets.broadcast([connection for connection in asdf.connections if connection.connected], json.dumps(data))
+    print("broadcast")
 
 
 def start_websocket():
+    load_dotenv()
+    broker_ip = os.getenv("BROKER_IP")
+    if broker_ip is None:
+        raise Exception("no broker ip in .env")
+
+
     client = mqtt.Client("Timms Zentrale")
-    client.connect("172.19.72.246")
+    client.connect(broker_ip)
     client.loop_start()
     client.subscribe("sensorclient/data")
     client.on_message = on_message
