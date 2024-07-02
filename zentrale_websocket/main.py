@@ -7,19 +7,9 @@ import asyncio
 import json
 import os
 
-class Client:
-    connections: list[Client] = []
 
-    def __init__(self, websocket: websockets.server.WebSocketServerProtocol) -> None:
-        self.websocket = websocket
-
-    @property
-    def connected(self) -> bool:
-        connected = self.websocket is not None and self.websocket.state == 1
-        if not connected:
-            Client.connections.remove(self)
-
-        return connected
+class Connections:
+    clients: list[websockets.server.WebSocketServerProtocol] = []
 
 
 async def handler(websocket: websockets.server.WebSocketServerProtocol):
@@ -41,7 +31,7 @@ async def handler(websocket: websockets.server.WebSocketServerProtocol):
             continue
 
         if data["type"] == "connect":
-            Client.connections.append(Client(websocket))
+            Connections.clients.append(websocket)
             await websocket.send("Hi")
 
 
@@ -68,8 +58,9 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
         "temp_limit": raw_data[3]
     }
 
-    temp = [client.websocket for client in Client.connections if client.connected] 
-    websockets.broadcast(temp, json.dumps(data))
+    # filter out disconnected clients
+    Connections.clients = [websocket for websocket in Connections.clients if websocket.state == 1] 
+    websockets.broadcast(Connections.clients, json.dumps(data))
     print("broadcast")
 
 
