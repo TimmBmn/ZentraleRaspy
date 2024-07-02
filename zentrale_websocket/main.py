@@ -1,3 +1,4 @@
+from __future__ import annotations
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
 import websockets.server
@@ -6,20 +7,22 @@ import asyncio
 import json
 import os
 
-class asdf:
-    connections: dict = {}
+class Client:
+    connections: list[Client] = []
 
     def __init__(self, websocket: websockets.server.WebSocketServerProtocol) -> None:
         self.websocket = websocket
 
     @property
-    def connected(self):
-        connected = self.websocket is not None and self.websocket.state > 1
+    def connected(self) -> bool:
+        connected = self.websocket is not None and self.websocket.state == 1
         if not connected:
-            del asdf.connections[self.websocket.id]
+            Client.connections.remove(self)
+
+        return connected
 
 
-async def handler(websocket):
+async def handler(websocket: websockets.server.WebSocketServerProtocol):
     async for message in websocket:
         try:
             data = json.loads(message)
@@ -38,11 +41,12 @@ async def handler(websocket):
             continue
 
         if data["type"] == "connect":
-            asdf.connections[websocket.id] = asdf(websocket)
+            Client.connections.append(Client(websocket))
+            await websocket.send("Hi")
 
 
 async def main():
-    await websockets.serve(handler, "127.0.0.1", 6000)
+    await websockets.serve(handler, "127.0.0.1", 8765)
     await asyncio.Future() # run forever
 
 
@@ -64,7 +68,8 @@ def on_message(client: mqtt.Client, userdata, msg: mqtt.MQTTMessage):
         "temp_limit": raw_data[3]
     }
 
-    websockets.broadcast([connection for connection in asdf.connections if connection.connected], json.dumps(data))
+    temp = [client.websocket for client in Client.connections if client.connected] 
+    websockets.broadcast(temp, json.dumps(data))
     print("broadcast")
 
 

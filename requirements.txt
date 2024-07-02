@@ -1,2 +1,4 @@
 paho-mqtt<2.0.0
 flask
+websockets
+python-dotenv
