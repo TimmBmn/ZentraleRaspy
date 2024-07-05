@@ -5,6 +5,10 @@ app = Flask(__name__)
 def homepage():
     return render_template("index.html")
 
+@app.route("/test")
+def test():
+    return render_template("test.html")
+
 def start_website(debug=False):
     app.run(debug=debug)
 

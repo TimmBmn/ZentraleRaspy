@@ -32,7 +32,6 @@ async def handler(websocket: websockets.server.WebSocketServerProtocol):
 
         if data["type"] == "connect":
             Connections.clients.append(websocket)
-            await websocket.send("Hi")
 
 
 async def main():

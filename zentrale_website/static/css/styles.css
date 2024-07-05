@@ -1,0 +1,48 @@
+* {
+    font-family: monospace;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+canvas {
+    /* max-width: 300px; */
+}
+
+.room {
+    display: flex;
+    flex-direction: column;
+}
+
+.alarm {
+    background: red;
+}
+
+.room-information {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+}
+
+.room-wet-or-dry {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.shutdown-button {
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 1rem;
+}
