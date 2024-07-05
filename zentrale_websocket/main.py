@@ -1,6 +1,6 @@
 from __future__ import annotations
 import paho.mqtt.client as mqtt
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import websockets.server
 import websockets
 import asyncio
