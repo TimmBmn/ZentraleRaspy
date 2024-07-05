@@ -1,6 +1,7 @@
 * {
     font-family: monospace;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 h1 {
@@ -14,10 +15,6 @@ h2 {
 main {
     display: grid;
     grid-template-columns: 1fr 1fr;
-}
-
-canvas {
-    /* max-width: 300px; */
 }
 
 .room {
